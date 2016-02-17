@@ -1,7 +1,7 @@
 # ansible-role-percona
 Ansible playbook to install, configure, monitor percona MySQL on RHEL/CentOS servers.
 
-note: install percona MySQL in linux generic way.
+###note: install percona MySQL in linux generic way.
 
 ## Requirements
 
@@ -15,9 +15,11 @@ pre_packages:
   - MySQL-python.x86_64
   - numactl.x86_64
 ```
+The perl package ensure that percona toolkit and percona-xtrabackup can be use;
+if percona Server support numa features, numactl shuld be installed. if you 
+want manage MySQL with ansible, MySQL-python shuld be installed.
 
 ## Structure after installed
-
 ```
 /web/mysql/node3303/
 ├── data
@@ -46,7 +48,6 @@ pre_packages:
 ├── stop
 └── use
 ```
-
 /web/mysql: mysql instance dir.
 nodexxxx:   node name with port number.
 data:       mysql data dir.
@@ -68,27 +69,41 @@ mysql manage tool:
 
 Available variables are listed below, almost with default values (see defaults/main.yml):
 
-``percona_binary``
+``
+percona_binary
+``
 Generic binary file path, such as "/root/Percona-Server-5.5.36-rel34.1-642.Linux.x86_64.tar.gz", 
 see test/test.yml, if not exists mysql_basedir, ansible will extra binary file.
 
-``percona_ver``
+``
+percona_ver
+``
 Specify percona MySQL version to identify different MySQL Server, and configure with matched 
 percona variables.
 
-``mysql_numa``
+``
+mysql_numa
+``
 Whether enable numa feature or not, if yes, numactl shoule be installed.
 
-``mysql_malloclib``
+``
+mysql_malloclib
+``
 Configures libjemalloc if mysql_malloclib is yes.
 
-``mysql_basedir``
+``
+mysql_basedir
+``
 MySQL base dir.
 
-``mysql_node``
+``
+mysql_node
+``
 Multi mysql instance dir, one instance matched nodexxxx dir.
 
-``netaddress``
+``
+netaddress
+``
 Specify the network card to get the ip address, and calculate MySQL server id.
 
 ```
