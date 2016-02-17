@@ -48,10 +48,15 @@ want manage MySQL with ansible, MySQL-python shuld be installed.
 ├── stop
 └── use
 ```
-/web/mysql: mysql instance dir.
-nodexxxx:   node name with port number.
-data:       mysql data dir.
-s3303:      mysql socket file.
+`/web/mysql`:  mysql instance dir.
+
+`nodexxxx`:    node name with port number.
+
+`data`:        mysql data dir.
+
+`s3303`:       mysql socket file.
+
+`my.node.cnf`: mysql configuration file.
 
 mysql manage tool:
 ```
@@ -69,41 +74,48 @@ mysql manage tool:
 
 Available variables are listed below, almost with default values (see defaults/main.yml):
 
-``
+```
 percona_binary
-``
+
+```
 Generic binary file path, such as "/root/Percona-Server-5.5.36-rel34.1-642.Linux.x86_64.tar.gz", 
 see test/test.yml, if not exists mysql_basedir, ansible will extra binary file.
 
-``
+```
 percona_ver
-``
+```
+
 Specify percona MySQL version to identify different MySQL Server, and configure with matched 
 percona variables.
 
-``
+```
 mysql_numa
-``
+```
+
 Whether enable numa feature or not, if yes, numactl shoule be installed.
 
-``
+```
 mysql_malloclib
-``
+```
+
 Configures libjemalloc if mysql_malloclib is yes.
 
-``
+```
 mysql_basedir
-``
+```
+
 MySQL base dir.
 
-``
+```
 mysql_node
-``
+```
+
 Multi mysql instance dir, one instance matched nodexxxx dir.
 
-``
+```
 netaddress
-``
+```
+
 Specify the network card to get the ip address, and calculate MySQL server id.
 
 ```
@@ -174,7 +186,7 @@ mysql_innodb_lock_wait_timeout: 50
 mysql_innodb_read_io_threads: 8
 mysql_innodb_write_io_threads: 8
 ```
-MySQL innodb setttings.
+MySQL innodb setttings. see templates/my.node.cnf.j2
 
 # Example Playbook
 
