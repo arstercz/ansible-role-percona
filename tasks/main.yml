@@ -40,5 +40,4 @@
 - include: install.yml
 - include: secure-sql.yml
 - include: replication.yml
-- include: mha_node.yml
 - include: zabbix_mysql.yml

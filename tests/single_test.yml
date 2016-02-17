@@ -19,8 +19,6 @@
                    password: 'repl_pass',
                    priv: '*.*:REPLICATION SLAVE',
                 }
-     mha_node_rpm: mha4mysql-node-0.56-0.el6.noarch.rpm
-     mha_node_rpm_path: /root/{{ mha_node_rpm }}              
      git_url: 'https://github.com/chenzhe07/zabbix_mysql.git'
   roles:
      - ansible-role-percona
