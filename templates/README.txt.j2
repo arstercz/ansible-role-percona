@@ -1,0 +1,61 @@
+This is mysql node with management sripts and data directory,
+ prepared by NodeManager::MySQL(0.0201)
+
+
+general notes
+
+ The scripts basically change to base directory and invoke MySQL executables
+ with --defaults-file=<nodedir>/my.node.cnf as the first command line option,
+ instead of reading the global /etc/my.cnf and extra files.  The scripts are
+ inspired by MySQL Sandbox and the mysqld.server initrd script.
+
+ For the sake of security, only the data directory is owned by the mysql user,
+ others by root. The password file is placed in the user's home directory.
+
+ The mysql user is usually created when mysql-server is installed, as listed 
+ by 'rpm -q --scripts mysql-server':
+
+   preinstall scriptlet (using /bin/sh):
+   /usr/sbin/useradd -M -o -r -d /var/lib/mysql -s /bin/bash 
+          -c "MySQL Server" -u 27 mysql > /dev/null 2>&1 || :
+
+ Any question, do not hesitate to contact <kaiwang.chen@gmail.com> or 
+<chenzhe07@gmail.com> .
+
+
+practice notes
+
+ Each node in the replication chain should use same config except server-id.
+
+ socket is data/s<port>, pid file is data/mysql.pid
+
+ scripts source noderc in the same directory to get BASEDIR setting.
+
+ use pt-config-diff to verify my.node.cnf is consistent with the running instance
+
+ see comments in the option file.
+
+
+commands
+
+ ./node {start|stop|status}
+ ./my sqladmin status
+ ./my sqlshow 
+ ./my _print_defaults mysql client
+ ./use
+ ./use mysql
+ ./use db1
+
+
+resources
+
+  http://mysqlsandbox.net/
+  http://dev.mysql.com/doc/refman/5.1/en/server-system-variables.html
+  http://dev.mysql.com/doc/refman/5.5/en/server-system-variables.html
+  http://www.percona.com/doc/percona-server/5.1/
+  http://www.percona.com/doc/percona-server/5.5/
+  http://www.mysqlperformanceblog.com/2006/05/30/innodb-memory-usage/
+  http://www.mysqlperformanceblog.com/2007/11/03/choosing-innodb_buffer_pool_size
+  http://www.percona.com/redir/files/presentations/WEBINAR2012-03-Optimizing-MySQL-Configuration.pdf
+  
+

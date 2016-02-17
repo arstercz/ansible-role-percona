@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# kc20120602
+
+set -e
+
+BASEDIR=
+NODEDIR=`dirname $0`
+echo "$NODEDIR" | grep -q '^/' || NODEDIR="`pwd`/$NODEDIR"
+NODERC="$NODEDIR/noderc"
+OPTION_FILE="$NODEDIR/my.node.cnf"
+
+if [ -f "$NODERC" ]
+then
+    . "$NODERC"
+fi
+
+if [ "$BASEDIR"x = "x" ]
+then
+    echo "empty BASEDIR! exit.."
+    exit 1
+fi
+
+export LD_LIBRARY_PATH=$BASEDIR/lib:$BASEDIR/lib/mysql:$LD_LIBRARY_PATH
+MYSQL=$BASEDIR/bin/mysql
+
+if [ -f $PIDFILE ]
+then
+    exec "$MYSQL" --defaults-file=$OPTION_FILE "$@"
+fi

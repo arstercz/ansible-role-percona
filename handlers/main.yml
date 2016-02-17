@@ -1,0 +1,10 @@
+---
+- name: start mysqld
+  shell: echo "create"
+  shell: ./start chdir="{{ mysql_nodedir }}"
+
+- name: stop mysqld
+  shell: ./stop chdir="{{ mysql_nodedir }}"
+
+- name: restart zabbix_agent
+  service: "name=zabbix-agent state=restarted sleep=1"

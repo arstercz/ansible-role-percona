@@ -1,0 +1,13 @@
+galaxy_info:
+  author: zhe chen <chenzhe07@gmail.com>
+  description: "MySQL general install and configuration (hardening, databases, users, ...)"
+  min_ansible_version: 1.4
+  license: MIT
+  platforms:
+  - name: Centos
+    versions:
+    - all
+  categories:
+  - system
+
+dependencies: []

@@ -1,0 +1,4 @@
+---
+- name: Add general mysql user
+  user: name=mysql state=present
+  register: centos_run_user

@@ -1,0 +1,50 @@
+---
+- hosts: cz-test3
+  remote_user: root
+  vars:
+     percona_binary: "/root/Percona-Server-5.5.36-rel34.1-642.Linux.x86_64.tar.gz"
+     percona_ver: 55
+     mysql_numa: yes
+     mysql_malloclib: yes
+     mysql_port: 3303
+     mysql_basedir: "/opt/Percona-Server-5.5.36-rel34.1-642.Linux.x86_64"
+     mysql_node: "/web/mysql"
+     netaddress: "{{ ansible_eth0.ipv4.address }}"
+     monitor_user: "monitor"
+     monitor_host: "{{ netaddress | regex_replace('.\\d+$','.%') }}"
+     mysql_replication_role: 'master'
+     mysql_replication_user: {
+                   name: 'user_replica',
+                   host: "{{ monitor_host }}",
+                   password: 'replicate_password',
+                   priv: '*.*:REPLICATION SLAVE',
+                }
+     git_url: 'https://github.com/chenzhe07/zabbix_mysql.git'
+  roles:
+     - ansible-role-percona
+
+- hosts: cz-test2
+  remote_user: root
+  vars: 
+     percona_binary: "/root/Percona-Server-5.5.36-rel34.1-642.Linux.x86_64.tar.gz"
+     percona_ver: 55
+     mysql_numa: yes
+     mysql_malloclib: yes
+     mysql_port: 3303
+     mysql_basedir: "/opt/Percona-Server-5.5.36-rel34.1-642.Linux.x86_64"
+     mysql_node: "/web/mysql"
+     netaddress: "{{ ansible_eth0.ipv4.address }}"
+     monitor_user: "monitor"
+     monitor_host: "{{ netaddress | regex_replace('.\\d+$','.%') }}"
+     mysql_replication_role: 'slave'
+     mysql_replication_master: '10.0.21.17'
+     mysql_replication_port: "{{ mysql_port }}"
+     mysql_replication_user: {
+                   name: 'user_replica',
+                   host: "{{ monitor_host }}",
+                   password: 'replicate_password',
+                   priv: '*.*:REPLICATION SLAVE',
+                }
+     git_url: 'https://github.com/chenzhe07/zabbix_mysql.git'
+  roles:
+     - ansible-role-percona

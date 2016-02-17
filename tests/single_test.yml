@@ -1,0 +1,26 @@
+---
+- hosts: cz-test2
+  remote_user: root
+  vars:
+     percona_binary: "/root/Percona-Server-5.5.47-rel37.7-Linux.x86_64.ssl098e.tar.gz"
+     percona_ver: 55
+     mysql_numa: yes
+     mysql_malloclib: yes
+     mysql_port: 3308
+     mysql_basedir: "/opt/Percona-Server-5.5.47-rel37.7-Linux.x86_64.ssl098e"
+     mysql_node: "/web/mysql"
+     netaddress: "{{ ansible_eth0.ipv4.address }}"
+     monitor_user: "monitor"
+     monitor_host: "{{ netaddress | regex_replace('.\\d+$','.%') }}"
+     mysql_replication_role: 'master'
+     mysql_replication_user: {
+                   name: 'user_replica',
+                   host: "{{ monitor_host }}",
+                   password: 'repl_pass',
+                   priv: '*.*:REPLICATION SLAVE',
+                }
+     mha_node_rpm: mha4mysql-node-0.56-0.el6.noarch.rpm
+     mha_node_rpm_path: /root/{{ mha_node_rpm }}              
+     git_url: 'https://github.com/chenzhe07/zabbix_mysql.git'
+  roles:
+     - ansible-role-percona

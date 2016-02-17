@@ -1,0 +1,21 @@
+---
+__pre_packages:
+  - openssl098e.x86_64
+  - perl-DBD-MySQL.x86_64
+  - perl-DBI.x86_64
+  - perl-Time-HiRes.x86_64
+  - perl-TermReadKey.x86_64
+  - MySQL-python.x86_64
+  - numactl.x86_64
+
+mysql_config_file: "{{ mysql_nodedir }}/my.node.cnf"
+
+__manage_tool:
+  - README.txt
+  - my
+  - node
+  - noderc
+  - start
+  - status
+  - stop
+  - use

@@ -1,0 +1,16 @@
+---
+- name: check zabbix mysql monitor exists
+  stat: path=/usr/local/zabbix_mysql/install.sh
+  register: zbstat
+
+- name: check zabbix mysql conf exists
+  stat: path=/etc/zabbix/zabbix_agentd.d/userparameter_discovery_mysql.conf
+  register: zbconf
+- name: git clone zabbix mysql template from git
+  git: repo={{ git_url }} dest=/usr/local/zabbix_mysql
+  when: zbstat.stat.exists == false
+
+- name: install zabbix mysql
+  shell: /bin/bash /usr/local/zabbix_mysql/install.sh {{ netaddress }}
+  notify: restart zabbix_agent
+  when: zbconf.stat.exists == false

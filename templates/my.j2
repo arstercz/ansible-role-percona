@@ -1,0 +1,75 @@
+#!/bin/bash
+
+# kc20120602
+
+set -e
+
+if [ "$1" = "" ]
+then
+    echo "syntax my sql{dump|binlog|admin} arguments"
+    exit
+fi
+
+BASEDIR=
+NODEDIR=`dirname $0`
+echo "$NODEDIR" | grep -q '^/' || NODEDIR="`pwd`/$NODEDIR"
+NODERC="$NODEDIR/noderc"
+OPTION_FILE="$NODEDIR/my.node.cnf"
+
+if [ -f "$NODERC" ]
+then
+    . "$NODERC"
+fi
+
+if [ "$BASEDIR"x = "x" ]
+then
+    echo "empty BASEDIR! exit.."
+    exit 1
+fi
+
+export LD_LIBRARY_PATH=$BASEDIR/lib:$BASEDIR/lib/mysql:$LD_LIBRARY_PATH
+MYSQL=$BASEDIR/bin/mysql
+
+SUFFIX=$1
+shift
+
+MYSQLCMD="$BASEDIR/bin/my$SUFFIX"
+
+NODEFAULT=(myisam_ftdump
+myisamlog
+mysql_config
+mysql_convert_table_format
+mysql_find_rows
+mysql_fix_extensions
+mysql_fix_privilege_tables
+mysql_secure_installation
+mysql_setpermission
+mysql_tzinfo_to_sql
+mysql_upgrade
+mysql_waitpid
+mysql_zap
+mysqlaccess
+mysqlbinlog
+mysqlbug
+mysqldumpslow
+mysqlhotcopy
+mysqltest
+mysqltest_embedded)
+
+DEFAULTSFILE="--defaults-file=$OPTION_FILE"
+
+for NAME in ${NODEFAULT[@]}
+do
+    if [ "my$SUFFIX" = "$NAME" ]
+    then
+        DEFAULTSFILE="--no-defaults"
+        break
+    fi
+done
+
+if [ -f $MYSQLCMD ]
+then
+    exec "$MYSQLCMD" $DEFAULTSFILE "$@"
+else
+    echo "$MYSQLCMD not found "
+fi

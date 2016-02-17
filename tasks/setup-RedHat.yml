@@ -1,0 +1,13 @@
+---
+- name: Ensure MySQL node33xx  dirs are exists
+  file:
+     dest: "{{ mysql_datadir }}"
+     owner: mysql
+     group: mysql
+     mode: 0755
+     state: directory
+
+- name: Ensure openssl098e and DBD-mysql etc.. packages are installed.
+  yum: "name={{ item }} state=installed enablerepo={{ mysql_enablerepo }}"
+  with_items: pre_packages
+  register: centos_pre_install_packages

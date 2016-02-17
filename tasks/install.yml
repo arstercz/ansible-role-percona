@@ -1,0 +1,41 @@
+---
+- name: check mysql_basedir is exists
+  stat: path="{{ mysql_basedir }}/bin/mysql"
+  register: basedir_stat
+
+- name: unarchive bianry percona server
+  unarchive: src="{{ percona_binary }}" dest=/opt copy=yes
+  when: basedir_stat.stat.exists == False
+
+- name: check percona server datadir
+  stat: path="{{ mysql_datadir }}/mysql"
+  register: datadir_stat
+
+- name: remove exists .my.cnf first
+  file:
+    path: "{{ mysql_nodedir }}/.my.cnf"
+    state: absent
+  when: datadir_stat.stat.exists == False
+
+- name: initialize percona server
+  command:
+    "{% if percona_ver == 51 %}
+    {{ mysql_basedir }}/bin/mysql_install_db --user={{ mysql_run_user }} --defaults-file={{ mysql_config_file }} --basedir={{ mysql_basedir }} --datadir={{ mysql_datadir }}
+    {% else %}
+    {{ mysql_basedir }}/scripts/mysql_install_db --user={{ mysql_run_user }} --defaults-file={{ mysql_config_file }} --basedir={{ mysql_basedir }} --datadir={{ mysql_datadir }}
+    {% endif %}"
+  when: datadir_stat.stat.exists == False
+
+- name: check port whether used
+  shell: /bin/netstat -tunlp | grep ":{{ mysql_port }} " | sed -e 's/.*\///'
+  register: port_stat
+
+- name: start percona server
+  command: ./start chdir="{{ mysql_nodedir }}"
+  when: port_stat.stdout == ""
+  
+- name: wait for percona server start
+  wait_for: 
+     port: "{{ mysql_port }}"
+     state: started
+     timeout: 5

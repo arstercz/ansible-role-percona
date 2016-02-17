@@ -1,0 +1,44 @@
+---
+# Include variables and define needed variables.
+- name: Include OS-specific variables.
+  include_vars: "{{ ansible_os_family }}.yml"
+
+- name: Define pre_packages
+  set_fact:
+    pre_packages: "{{ __pre_packages | list }}"
+  when: pre_packages is not defined
+
+- name: Define manage tool
+  set_fact:
+    manage_tool: "{{ __manage_tool | list }}"
+  when: manage_tool is not defined
+
+# Setup/Install tasks.
+- include: setup-RedHat.yml
+  when: ansible_os_family == 'RedHat'
+
+- include: users.yml
+- name: Check if run user were added.
+  set_fact:
+    mysql_run_users: "{{ (centos_run_user is defined and centos_run_user.changed) }}"
+
+- name: Check if pre_packages were installed.
+  set_fact:
+    pre_install_packages: "{{ (centos_pre_install_packages is defined and centos_pre_install_packages.changed) }}"
+
+- name: Check if manage tool were copyed.
+  set_fact:
+    mysql_manage_tool: "{{ centos_manage_tool is defined and centos_manage_tool.changed }}"
+
+- name: Check if mha user added.
+  set_fact:
+    mha_run_users: "{{ mha_run_user is defined and mha_run_user.changed }}"
+
+# Configure MySQL.
+- include: configure.yml
+- include: tools.yml
+- include: install.yml
+- include: secure-sql.yml
+- include: replication.yml
+- include: mha_node.yml
+- include: zabbix_mysql.yml

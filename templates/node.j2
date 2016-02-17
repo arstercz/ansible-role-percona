@@ -1,0 +1,192 @@
+#!/bin/bash
+
+# kc20120603 node management script. 
+#  start   use msyqld_safe to start slave, wait 1min and report
+#  stop    use mysqladmin to stop slave then stop node, wait until stopped
+#  status  test pid file
+#
+
+set -e
+
+MODE=$1
+[ $# -ge 1 ] && shift
+
+BASEDIR=
+NODEDIR=`dirname $0`
+echo "$NODEDIR" | grep -q '^/' || NODEDIR="`pwd`/$NODEDIR"
+NODERC="$NODEDIR/noderc"
+OPTION_FILE="$NODEDIR/my.node.cnf"
+
+if [ -f "$NODERC" ]
+then
+    . "$NODERC"
+fi
+
+if [ "$BASEDIR"x = "x" ]
+then
+    echo "empty BASEDIR! exit.."
+    exit 1
+fi
+
+export LD_LIBRARY_PATH=$BASEDIR/lib:$BASEDIR/lib/mysql:$LD_LIBRARY_PATH
+
+# required executables
+if which pgrep >/dev/null
+then
+    :
+else
+    echo 'require pgrep, use "yum install procps" to install'
+    exit 1;
+fi
+MYSQLD_SAFE="$BASEDIR/bin/mysqld_safe"
+if [ ! -x "$MYSQLD_SAFE" ]
+then
+    echo "mysqld_safe not found in $BASEDIR/bin/"
+    exit 1
+fi
+MYSQL_ADMIN="$BASEDIR/bin/mysqladmin"
+if [ ! -x "$MYSQL_ADMIN" ]
+then
+    echo "mysqladmin not found in $BASEDIR/bin/"
+    exit 1
+fi
+MY_PRINT_DEFAULTS="$BASEDIR/bin/my_print_defaults"
+if [ ! -x "$MY_PRINT_DEFAULTS" ]
+then
+    echo "my_print_defaults not found in $BASEDIR/bin/"
+    exit 1
+fi
+
+DEFAULTS="`$MY_PRINT_DEFAULTS --defaults-file="$OPTION_FILE" mysqld`"
+
+# required options
+SERVERID=`echo "$DEFAULTS" | sed -n -e '/^--server-id/s/^--server-id=//p'`
+PORT=`echo "$DEFAULTS" | sed -n -e '/^--port/s/^--port=//p'`
+DATADIR=`echo "$DEFAULTS" | sed -n -e '/^--datadir/s/^--datadir=//p'`
+PIDFILE=`echo "$DEFAULTS" | sed -n -e '/^--pid-file/s/^--pid-file=//p'`
+SOCKET=`echo "$DEFAULTS" | sed -n -e '/^--socket/s/^--socket=//p'`
+if [ "$SERVERID"x = "x" -o "$PORT"x = "x" -o "$DATADIR"x = "x" -o "$PIDFILE"x = "x" -o "$SOCKET"x = "x" ]
+then
+    echo "required options: server-id port datadir pid-file socket"
+    exit 1
+fi
+
+# server-id sanity check
+(( GUESSED_HOSTID = ( $SERVERID>>16 ) ))
+(( GUESSED_PORT  = ( $SERVERID & ((1<<15) - 1) ) ))
+if [ $PORT -ne $GUESSED_PORT -o $GUESSED_HOSTID -eq 0 ]
+then
+    echo "serverid format changed: serverid $SERVERID != port $PORT + (hostid $GUESSED_HOSTID<<16)"
+    exit 1
+fi
+
+case $MODE in
+'start')
+    MYSQLD_SAFE_OK=`sh -n $MYSQLD_SAFE 2>&1`
+    if [ ! "$MYSQLD_SAFE_OK"x = "x" ]
+    then
+        echo "$MYSQLD_SAFE has errors"
+        echo "((( $MYSQLD_SAFE_OK )))"
+        exit 1
+    fi
+
+    if [ -f $PIDFILE ]
+    then
+        echo "node already started (found pid file $PIDFILE)"
+    else
+        CURDIR=`pwd`
+        cd $BASEDIR
+        if [ "$DEBUG_NODE"x = "x" ]
+        then
+            $MYSQLD_SAFE --defaults-file="$OPTION_FILE" $@ > /dev/null 2>&1 &
+        else
+            $MYSQLD_SAFE --defaults-file="$OPTION_FILE" $@ >> "$NODEDIR/start.log" 2>&1 &
+            SAFE_PID=$!
+        fi
+        cd $CURDIR
+
+        echo -n 'waiting node start '
+        TIMEOUT=180
+        ATTEMPTS=1
+        while [ ! -s $PIDFILE ] 
+        do
+            ATTEMPTS=$(( $ATTEMPTS + 1 ))
+            echo -n "."
+            if [ $ATTEMPTS = $TIMEOUT ]
+            then
+                break
+            fi
+            sleep 1
+        done
+        
+        if [ -s $PIDFILE ]
+        then
+            PID=`cat "$PIDFILE"`
+            echo " node on pid=$PID port=$PORT hostid=$GUESSED_HOSTID"
+        else
+            echo " node not started yet"
+            exit 1
+        fi
+    fi
+    ;;
+
+'stop')
+    if [ -s $PIDFILE ]
+    then
+        PID=`cat "$PIDFILE"`
+        if [ -f $DATADIR/master.info ]
+        then
+            echo -n 'waiting slave stop '
+            $MYSQL_ADMIN --defaults-file=$OPTION_FILE 'stop-slave' > /dev/null &
+            ADMIN_PID=$!
+            #while echo 'show slave status\G' | $MYSQL --defaults-file=$OPTION_FILE | grep -q -P 'Slave_(?:IO|SQL)_Running: Yes'
+            while pgrep -P $$ 'mysqladmin' > /dev/null
+            do
+                echo -n .
+                sleep 1
+            done
+            echo
+        fi
+        echo -n 
+        $MYSQL_ADMIN --defaults-file=$OPTION_FILE shutdown &
+        ADMIN_PID=$!
+        echo -n 'waiting node shutdown '
+        #while [ -f $PIDFILE ] 
+        while pgrep -P $$ 'mysqladmin' > /dev/null
+        do
+            echo -n .
+            sleep 1
+        done
+        echo " node off pid=$PID port=$PORT hostid=$GUESSED_HOSTID"
+    fi
+    ;;
+
+'status')
+    if [ -f $PIDFILE ]
+    then
+        PID=`cat "$PIDFILE"`
+        ON=
+        if [ -n $PID ]
+        then
+            if kill -0 $PID
+            then
+                echo "node on pid=$PID port=$PORT hostid=$GUESSED_HOSTID"
+                ON="yes"
+            fi
+        fi
+
+        if [ -z $ON ]
+        then
+            echo "node dead pidfile=$PIDFILE"
+        fi
+    else
+        echo "node off port=$PORT hostid=$GUESSED_HOSTID"
+    fi
+    ;;
+
+*)
+    echo "Usage: $0 {start|stop|status}"
+    exit 1
+    ;;
+esac
+

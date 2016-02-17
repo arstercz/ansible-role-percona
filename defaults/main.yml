@@ -1,0 +1,90 @@
+---
+mysql_root_username: root
+mysql_root_password: longpassword
+mysql_run_user: mysql
+
+# Set this to `yes` to forcibly update the root password.
+mysql_root_password_update: yes
+
+# list of repos to use (e.g "remi,epel"), Used for CentOS system.
+mysql_enablerepo: "epel"
+
+# Define a custom list of packages to install; if none provided, the default
+# package list from vars/[OS-family].yml will be used.
+# pre_packages:
+#  - openssl098e.x86_64
+#  - perl-DBD-MySQL.x86_64
+
+# MySQL connection settings.
+mysql_port: 3306
+mysql_bind_address: '0.0.0.0'
+mysql_basedir: "/opt/Percona-Server-5.5.36-rel34.1-642.Linux.x86_64"
+mysql_node: "/web/mysql"
+mysql_nodedir: "{{ mysql_node }}/node{{ mysql_port }}"
+mysql_datadir: "{{ mysql_nodedir }}/data"
+mysql_pid_file: "{{ mysql_datadir }}/mysql.pid"
+mysql_socket: "{{ mysql_datadir }}/s{{ mysql_port }}"
+mysql_character_set: "utf8"
+mysql_general_ci: "utf8_general_ci"
+
+# Slow query log settings.
+mysql_slow_query_log_enabled: yes
+mysql_slow_query_log_file: "slow-query.log"
+mysql_slow_query_time: 1
+
+# Memory settings (default values optimized ~512MB RAM).
+mysql_key_buffer_size: "64M"
+mysql_max_allowed_packet: "32M"
+mysql_table_open_cache: "1024"
+mysql_sort_buffer_size: "2M"
+mysql_read_buffer_size: "2M"
+mysql_join_buffer_size: "2M"
+mysql_read_rnd_buffer_size: "4M"
+mysql_myisam_sort_buffer_size: "32M"
+mysql_thread_cache_size: "64"
+mysql_query_cache_size: "16M"
+mysql_max_connections: 3000
+mysql_max_connect_errors: 100000
+
+# Other settings.
+mysql_wait_timeout: 3600
+
+# Try number of CPU's * 2 for thread_concurrency.
+mysql_thread_concurrency: 10
+
+# InnoDB settings.
+# Set .._buffer_pool_size up to 80% of RAM but beware of setting too high.
+mysql_innodb_file_per_table: "1"
+mysql_innodb_buffer_pool_size: "12228M"
+mysql_innodb_additional_mem_pool_size: "20M"
+# Set .._log_file_size to 25% of buffer pool size.
+mysql_innodb_log_file_size: "256M"
+mysql_innodb_log_buffer_size: "16M"
+mysql_innodb_flush_log_at_trx_commit: "2"
+mysql_default_storage_engine: "innodb"
+mysql_innodb_lock_wait_timeout: 50
+mysql_innodb_read_io_threads: 8
+mysql_innodb_write_io_threads: 8
+
+# common settings.
+mysql_back_log: 500
+mysql_slave_skip_errors: 1062
+mysql_expire_logs_days: 7
+mysql_server_id: 330986
+mysql_general_log: "query.log"
+
+# mysqldump settings.
+mysql_mysqldump_max_allowed_packet: "64M"
+
+# Logging settings.
+mysql_log: ""
+mysql_log_error: "syslog"
+mysql_syslog: yes
+mysql_syslog_tag: "{{ mysql_port }}"
+
+# Replication settings (replication is only enabled if master/user have values).
+mysql_replication_role: 'master'
+mysql_replication_master: '127.0.0.1'
+mysql_replication_port: "{{ mysql_port }}"
+# Same keys as `mysql_users` above.
+mysql_replication_user: []

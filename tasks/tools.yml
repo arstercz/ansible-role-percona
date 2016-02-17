@@ -1,0 +1,10 @@
+---
+- name: Copy manage tool
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ mysql_nodedir }}/{{ item }}"
+    owner: root
+    group: root
+    mode: "{% if item == 'README.txt' %} 0644 {% else %} 0744 {% endif %}"
+  with_items: manage_tool
+  register: centos_manage_tool
