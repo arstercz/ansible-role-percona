@@ -13,14 +13,14 @@
     manage_tool: "{{ __manage_tool | list }}"
   when: manage_tool is not defined
 
-# Setup/Install tasks.
-- include: setup-RedHat.yml
-  when: ansible_os_family == 'RedHat'
-
 - include: users.yml
 - name: Check if run user were added.
   set_fact:
     mysql_run_users: "{{ (centos_run_user is defined and centos_run_user.changed) }}"
+
+# Setup/Install tasks.
+- include: setup-RedHat.yml
+  when: ansible_os_family == 'RedHat'
 
 - name: Check if pre_packages were installed.
   set_fact:
