@@ -154,7 +154,7 @@ log-bin = mysql-bin.log
 sync_binlog = 1
 sync_binlog = 1  # BBU-backed RAID or flash
 relay-log = relay-bin.log  # auto purge by default, see relay-log-purge
-relay-log-purge = 0  # MHA node
+relay-log-purge = 1  # MHA advise: 0
 log-slave-updates
 replicate-same-server-id = 0
 binlog-ignore-db = mysql
