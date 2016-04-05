@@ -148,7 +148,7 @@ slow_query_log = 1
 slow_query_log_file = {{ mysql_slow_query_log_file }}
 long_query_time = {{ mysql_slow_query_time }}
 {% endif %}
-general_log = ON
+general_log = OFF
 general_log_file = {{ mysql_general_log }}
 log-bin = mysql-bin.log
 sync_binlog = 1
