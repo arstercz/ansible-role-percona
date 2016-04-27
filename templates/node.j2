@@ -92,6 +92,21 @@ case $MODE in
 
     if [ -f $PIDFILE ]
     then
+        HAS_PID=$(cat $PIDFILE)
+        if [ -d "/proc/$HAS_PID" ]; then
+            echo "pid $HAS_PID running"
+        else
+            printf "pid $HAS_PID not running..\ndelete $PIDFILE\n"
+            unlink $PIDFILE
+            if [ -e $SOCKET ]; then
+                echo "delete $SOCKET"
+                unlink $SOCKET;
+            fi
+        fi
+    fi
+
+    if [ -d "/proc/$HAS_PID" ]
+    then
         echo "node already started (found pid file $PIDFILE)"
     else
         CURDIR=`pwd`
