@@ -90,6 +90,7 @@ case $MODE in
         exit 1
     fi
 
+    HAS_PID=" "
     if [ -f $PIDFILE ]
     then
         HAS_PID=$(cat $PIDFILE)
