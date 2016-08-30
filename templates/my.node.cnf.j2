@@ -35,7 +35,7 @@ syslog-tag = {{ mysql_port }}
 {% endif %}
 #numa support
 {% if mysql_numa %}
-numa_interleave = 1
+#numa_interleave = 1
 innodb_buffer_pool_populate = 1
 flush_caches=1
 {% endif %}
