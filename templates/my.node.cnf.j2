@@ -105,6 +105,8 @@ log_warnings_suppress = 1592
 {% elif percona_ver == 56 %}
 # Percona Server enhancements
 #  http://www.percona.com/doc/percona-server
+gtid_mode=on
+enforce-gtid-consistency
 eq_range_index_dive_limit = 8  # performace for range list
 query_cache_strip_comments = 1  # ignore comments in query cache
 innodb_corrupt_table_action = warn  # 5.5.10-20.1 introduced
