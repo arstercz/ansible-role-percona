@@ -1,7 +1,7 @@
 # ansible-role-percona
 Ansible playbook to install, configure, monitor percona MySQL on RHEL/CentOS servers.
 
-# test with ansible 2.2.0.0
+### test with ansible 2.2.0.0
 
 ###note: install percona MySQL in linux generic way.
 
@@ -127,6 +127,11 @@ mysql_replication_user
 Setup the MySQL replication, the role is master or slave.
 
 ```
+mysql_replication_master
+```
+Setup the master ip address for the slave host.
+
+```
 git_url
 monitor_user
 monitor_host
@@ -227,6 +232,13 @@ mysql_replication_user_priv='*.*:REPLICATION SLAVE'
 mha_node_rpm=mha4mysql-node-0.56-0.el6.noarch.rpm
 mha_node_rpm_path="/root/{{ mha_node_rpm }}"
 git_url='https://github.com/chenzhe07/zabbix_mysql.git'
+```
+the following vars can be change depend on your replication env:
+```
+percona_binary
+percona_ver
+mysql_port
+mysql_replication_master
 ```
 
 ### repl_test.yml configure
