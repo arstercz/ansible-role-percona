@@ -190,36 +190,61 @@ MySQL innodb setttings. see templates/my.node.cnf.j2
 
 # Example Playbook
 
-see tests/single_test.yml
+see tests dirs
+install Percona MySQL replication with ansible
+
+### inventory configure
+```
+[master]
+10.0.21.7 mysql_replication_role='master'
+
+[slave]
+10.0.21.17 mysql_replication_role='slave'
+
+[mysqldb:children]
+master
+slave
+
+[mysqldb:vars]
+percona_binary="/root/Percona-Server-5.6.21-rel69.0-675.Linux.x86_64.tar.gz"
+percona_ver=56
+gtid_mode=1
+mysql_numa=yes
+mysql_malloclib=yes
+mysql_port=3308
+mysql_basedir="/opt/{{ percona_binary | regex_replace('\.tar\.gz|\/root\/','') }}"
+mysql_node="/web/mysql"
+netaddress="{{ ansible_eth0.ipv4.address }}"
+monitor_user="monitor"
+monitor_host="{{ netaddress | regex_replace('.\\d+$','.%') }}"
+mysql_replication_master='10.0.21.7'
+mysql_replication_user_name='user_replica'
+mysql_replication_user_host="{{ monitor_host }}"
+mysql_replication_user_password='C_KJuDZMDLWvCAex'
+mysql_replication_user_priv='*.*:REPLICATION SLAVE'
+mha_node_rpm=mha4mysql-node-0.56-0.el6.noarch.rpm
+mha_node_rpm_path="/root/{{ mha_node_rpm }}"
+git_url='https://github.com/chenzhe07/zabbix_mysql.git'
+```
+
+### repl_test.yml configure
 ```
 ---
-- hosts: cz-test2
+- hosts: master
+  remote_user: root
+  roles:
+      - ansible-role-percona
+
+- hosts: slave
   remote_user: root
   vars:
-     percona_binary: "/root/Percona-Server-5.5.47-rel37.7-Linux.x86_64.ssl098e.tar.gz"
-     percona_ver: 55
-     mysql_numa: yes
-     mysql_malloclib: yes
-     mysql_port: 3308
-     mysql_basedir: "/opt/Percona-Server-5.5.47-rel37.7-Linux.x86_64.ssl098e"
-     mysql_node: "/web/mysql"
-     netaddress: "{{ ansible_eth0.ipv4.address }}"
-     monitor_user: "monitor"
-     monitor_host: "{{ netaddress | regex_replace('.\\d+$','.%') }}"
-     mysql_replication_role: 'master'
-     mysql_replication_user: {
-                   name: 'user_replica',
-                   host: "{{ monitor_host }}",
-                   password: 'replicate_pass',
-                   priv: '*.*:REPLICATION SLAVE',
-                }
-     git_url: 'https://github.com/chenzhe07/zabbix_mysql.git'
+      mysql_replication_port: "{{ mysql_port }}"
   roles:
-     - ansible-role-percona
+      - ansible-role-percona
 ```
 
 run with:
-`ansible-playbook --verbose -i tests/inventory ansible-role-percona/tests/single_test.yml`
+`ansible-playbook --verbose -i tests/inventory tests/repl_test.yml`
 
 # License
 
