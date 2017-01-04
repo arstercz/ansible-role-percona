@@ -1,6 +1,8 @@
 # ansible-role-percona
 Ansible playbook to install, configure, monitor percona MySQL on RHEL/CentOS servers.
 
+# test with ansible 2.2.0.0
+
 ###note: install percona MySQL in linux generic way.
 
 ## Requirements
