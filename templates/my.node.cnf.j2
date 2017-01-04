@@ -78,11 +78,13 @@ innodb_log_buffer_size = {{ mysql_innodb_log_buffer_size }}
 innodb_flush_log_at_trx_commit = {{ mysql_innodb_flush_log_at_trx_commit }}
 innodb_flush_method = O_DIRECT
 innodb_file_per_table = {{ mysql_innodb_file_per_table }}
+innodb_file_format = Barracuda
 innodb_stats_on_metadata = 0
 innodb_read_io_threads = {{ mysql_innodb_read_io_threads }}
 innodb_write_io_threads = {{ mysql_innodb_write_io_threads }}
 innodb_lock_wait_timeout = {{ mysql_innodb_lock_wait_timeout }}
 default-storage-engine = {{ mysql_default_storage_engine }}
+skip-symbolic-links
 
 {% if percona_ver == 51 %}
 # Percona Server enhancements
@@ -102,19 +104,24 @@ innodb_corrupt_table_action = warn  # 5.5.10-20.1 introduced
 log_slow_verbosity = full
 userstat = 1  # 5.5.10-20.1 introduced
 log_warnings_suppress = 1592
+query_response_time_stats = 1
+slow_query_log_timestamp_always = 1
 {% elif percona_ver == 56 %}
 # Percona Server enhancements
 #  http://www.percona.com/doc/percona-server
-{% if gtid_mode == 'on' %}
+{% if gtid_mode == 1 %}
 gtid_mode=on
 enforce-gtid-consistency
 {% endif %}
+extra_port = {{ mysql_port + 1000 }}
+extra_max_connections = 2
 eq_range_index_dive_limit = 8  # performace for range list
 query_cache_strip_comments = 1  # ignore comments in query cache
 innodb_corrupt_table_action = warn  # 5.5.10-20.1 introduced
 innodb_buffer_pool_load_at_startup = 1  # 5.6 buffer pool restore
 innodb_buffer_pool_dump_at_shutdown = 1  # 5.6 buffer poll dump
 log_slow_verbosity = full
+slow_query_log_timestamp_always = 1
 userstat = 1  # 5.5.10-20.1 introduced
 {% endif %}
 
@@ -131,12 +138,14 @@ read_buffer_size = {{ mysql_read_buffer_size }}
 join_buffer_size = {{ mysql_join_buffer_size }}
 read_rnd_buffer_size = {{ mysql_read_rnd_buffer_size }}
 myisam_sort_buffer_size = {{ mysql_myisam_sort_buffer_size }}
+myisam_repair_threads = 1 # myisam auto repair
+myisam_recover
 query_cache_size = 0
 
 wait_timeout = {{ mysql_wait_timeout }}
 thread_concurrency = {{ mysql_thread_concurrency }}
 
-read_only = 1 # start read only, turn it off on master  afterwards by 
+read_only = 0 # start read only, turn it off on master  afterwards by 
               # 'SET GLOBAL read_only = 0'
 max_allowed_packet = {{ mysql_max_allowed_packet }}
 user = mysql
@@ -155,7 +164,6 @@ long_query_time = {{ mysql_slow_query_time }}
 general_log = OFF
 general_log_file = {{ mysql_general_log }}
 log-bin = mysql-bin.log
-sync_binlog = 1
 sync_binlog = 1  # BBU-backed RAID or flash
 relay-log = relay-bin.log  # auto purge by default, see relay-log-purge
 relay-log-purge = 1  # MHA advise: 0
