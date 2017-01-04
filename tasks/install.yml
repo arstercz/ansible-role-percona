@@ -17,6 +17,10 @@
     state: absent
   when: datadir_stat.stat.exists == False
 
+- name: link libreadline.so.5
+  shell: test -e /lib64/libreadline.so.5 || /bin/ln -s /lib64/libreadline.so.6.0 /lib64/libreadline.so.5
+  when: percona_ver == 56
+
 - name: initialize percona server
   command:
     "{% if percona_ver == 51 %}
